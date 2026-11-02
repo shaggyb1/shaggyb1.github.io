@@ -1,0 +1,73 @@
+/* Page background and hero visual. Remove this file, background.js and the .bg block in index.html to go back to a plain page. */
+
+.bg { position: fixed; inset: 0; z-index: -1; overflow: hidden; background: #0a0f1e; pointer-events: none; }
+
+.bg-glow { position: absolute; border-radius: 50%; filter: blur(70px); will-change: transform; }
+.bg-glow.blue { width: 52vw; height: 52vw; top: -18vw; right: -10vw; background: rgba(62, 116, 255, .2); }
+.bg-glow.violet { width: 40vw; height: 40vw; top: 34vh; right: 16vw; background: rgba(132, 92, 255, .13); }
+
+.bg-grid {
+  position: absolute; inset: 0;
+  background-image:
+    linear-gradient(rgba(150, 175, 255, .055) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(150, 175, 255, .055) 1px, transparent 1px);
+  background-size: 56px 56px;
+  -webkit-mask-image: radial-gradient(ellipse 75% 80% at 72% 22%, #000, transparent 75%);
+  mask-image: radial-gradient(ellipse 75% 80% at 72% 22%, #000, transparent 75%);
+}
+#bg-particles { position: absolute; inset: 0; width: 100%; height: 100%; }
+
+.bg-code { position: absolute; margin: 0; font: 12px/1.7 var(--mono); color: #a9bcff; opacity: .1; white-space: pre; }
+.bg-code.one { right: 4vw; top: 74vh; }
+.bg-code.two { left: 3vw; bottom: 5vh; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .bg-glow.blue { animation: glow-a 26s ease-in-out infinite alternate; }
+  .bg-glow.violet { animation: glow-b 32s ease-in-out infinite alternate; }
+}
+@keyframes glow-a { to { transform: translate(-7vw, 6vh) scale(1.1); } }
+@keyframes glow-b { to { transform: translate(8vw, -7vh) scale(.92); } }
+
+/* Hero visual: the system behind Upsoar, drawn as a small architecture map. */
+.hero-visual { position: relative; min-width: 0; --px: 0; --py: 0; }
+.sys { display: block; width: 100%; height: auto; overflow: visible; transform: translate(calc(var(--px) * -5px), calc(var(--py) * -5px)); transition: transform .5s ease-out; }
+.sys-plate { fill: rgba(92, 130, 255, .05); stroke: rgba(130, 160, 255, .22); stroke-width: 1; }
+.sys-line { fill: none; stroke: rgba(140, 170, 255, .3); stroke-width: 1; }
+.sys-flow { fill: none; stroke: #7fb0ff; stroke-width: 1.5; stroke-linecap: round; stroke-dasharray: 3 120; }
+.sys-flow.alt { stroke: #a78bff; }
+.sys-node rect { fill: rgba(16, 24, 46, .92); stroke: rgba(140, 170, 255, .4); stroke-width: 1; }
+.sys-node.main rect { stroke: #7fb0ff; }
+.sys-node text { font: 500 12px var(--mono); fill: #dbe4ff; text-anchor: middle; dominant-baseline: central; }
+
+.glass {
+  position: absolute; margin: 0; padding: 11px 14px;
+  background: rgba(17, 25, 48, .68);
+  border: 1px solid rgba(160, 185, 255, .2); border-radius: 10px;
+  -webkit-backdrop-filter: blur(9px); backdrop-filter: blur(9px);
+  box-shadow: 0 16px 40px rgba(3, 6, 18, .45);
+  font: 12px/1.65 var(--mono); color: #c9d4ee; white-space: pre;
+  transition: transform .5s ease-out;
+}
+.glass.code { top: -8px; right: -6px; transform: translate(calc(var(--px) * 9px), calc(var(--py) * 9px)); }
+.glass.term { bottom: -6px; left: -10px; transform: translate(calc(var(--px) * 13px), calc(var(--py) * 13px)); }
+.glass .k { color: #a78bff; } .glass .f { color: #7fb0ff; } .glass .ok { color: #6ee7b7; } .glass .d { color: #8291b0; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .sys-flow { animation: sys-flow 5s linear infinite; }
+  .sys-flow.alt { animation-duration: 7s; animation-delay: -2s; }
+}
+@keyframes sys-flow { from { stroke-dashoffset: 123; } to { stroke-dashoffset: 0; } }
+
+/* Below laptop width the two columns are too tight, so the visual moves under the text. */
+@media (max-width: 980px) {
+  .hero { grid-template-columns: minmax(0, 1fr); gap: 40px; }
+  .hero-visual { width: 100%; max-width: 480px; margin: 0 auto; }
+}
+
+@media (max-width: 760px) {
+  .top nav { gap: 4px 14px; font-size: 15px; justify-content: flex-start; }
+  .bg-code, .glass.code { display: none; }
+  .bg-glow.blue { width: 110vw; height: 110vw; top: -60vw; right: -50vw; }
+  .bg-glow.violet { width: 80vw; height: 80vw; top: 60vh; right: -30vw; }
+  .glass.term { left: 0; bottom: -14px; }
+}
