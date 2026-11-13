@@ -1,24 +1,71 @@
-/* Slow particles behind the page, and the 3D stack in the hero. */
+/* A honeycomb behind the page that lights up around the pointer, a few slow particles, and the 3D stack in the hero. */
 (function background() {
   const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const canvas = document.getElementById('bg-particles');
+  const canvas = document.getElementById('bg-honeycomb');
   const c = canvas.getContext('2d');
-  let W = 0, H = 0, dots = [];
+  const grid = document.createElement('canvas');
+  const g = grid.getContext('2d');
+  let W = 0, H = 0, R = 26, cells = [], dots = [], ripples = [];
+  const pointer = { x: 0, y: 0, on: false };
 
+  function hexPath(ctx, x, y, r) {
+    ctx.beginPath();
+    for (let k = 0; k < 6; k++) {
+      const a = Math.PI / 3 * k - Math.PI / 2;
+      ctx.lineTo(x + r * Math.cos(a), y + r * Math.sin(a));
+    }
+    ctx.closePath();
+  }
+
+  /* The plain grid never changes, so it is drawn once per resize onto a second canvas.
+     It is brightest at the top right, under the glow, and fades out toward the bottom left. */
   function size() {
     const dpr = Math.min(devicePixelRatio || 1, 2);
     W = innerWidth; H = innerHeight;
-    canvas.width = W * dpr; canvas.height = H * dpr;
+    R = W < 760 ? 20 : 26;
+    for (const cv of [canvas, grid]) { cv.width = W * dpr; cv.height = H * dpr; }
     c.setTransform(dpr, 0, 0, dpr, 0, 0);
-    const count = W < 760 ? 16 : 34;
+    g.setTransform(dpr, 0, 0, dpr, 0, 0);
+    const w = Math.sqrt(3) * R, step = 1.5 * R, far = Math.hypot(W, H);
+    cells = [];
+    g.clearRect(0, 0, W, H);
+    g.lineWidth = 1;
+    for (let row = 0, y = 0; y < H + R; row++, y += step) {
+      for (let x = row % 2 ? w / 2 : 0; x < W + w; x += w) {
+        const fade = Math.max(0, 1 - Math.hypot(x - W * .72, y - H * .2) / (far * .8));
+        g.strokeStyle = 'rgba(150, 175, 255, ' + (.025 + fade * .085).toFixed(3) + ')';
+        hexPath(g, x, y, R - 1);
+        g.stroke();
+        cells.push({ x, y, glow: 0 });
+      }
+    }
+    const count = W < 760 ? 10 : 20;
     dots = Array.from({ length: count }, () => ({
       x: Math.random() * W, y: Math.random() * H,
       vx: (Math.random() - .5) * .1, vy: (Math.random() - .5) * .1,
       r: .6 + Math.random() * 1, a: .15 + Math.random() * .35
     }));
   }
-  function draw() {
+
+  function draw(t) {
     c.clearRect(0, 0, W, H);
+    c.drawImage(grid, 0, 0, W, H);
+    ripples = ripples.filter(r => t - r.t < 1400);
+    for (const cell of cells) {
+      let target = 0;
+      if (pointer.on) target = Math.max(0, 1 - Math.hypot(cell.x - pointer.x, cell.y - pointer.y) / 150);
+      for (const r of ripples) {
+        const ring = (t - r.t) * .55, d = Math.hypot(cell.x - r.x, cell.y - r.y);
+        target = Math.max(target, (1 - Math.abs(d - ring) / 50) * (1 - (t - r.t) / 1400));
+      }
+      cell.glow += (Math.max(0, target) - cell.glow) * .16;
+      if (cell.glow < .02) continue;
+      hexPath(c, cell.x, cell.y, R - 2);
+      c.fillStyle = 'rgba(127, 176, 255, ' + (cell.glow * .13).toFixed(3) + ')';
+      c.fill();
+      c.strokeStyle = 'rgba(167, 139, 255, ' + (cell.glow * .55).toFixed(3) + ')';
+      c.stroke();
+    }
     for (const d of dots) {
       d.x = (d.x + d.vx + W) % W;
       d.y = (d.y + d.vy + H) % H;
@@ -28,24 +75,36 @@
       c.arc(d.x, d.y, d.r, 0, 6.283);
       c.fill();
     }
+    c.globalAlpha = 1;
   }
 
   let last = 0;
   function tick(t) {
     requestAnimationFrame(tick);
-    /* 24 frames a second is plenty for dots this slow, and saves battery. */
-    if (t - last < 41 || document.hidden) return;
+    /* 30 frames a second keeps the glow smooth without draining battery. */
+    if (t - last < 33 || document.hidden) return;
     last = t;
-    draw();
+    draw(t);
   }
 
   let resizeTimer;
   addEventListener('resize', () => {
     clearTimeout(resizeTimer);
-    resizeTimer = setTimeout(() => { size(); if (still) draw(); }, 150);
+    resizeTimer = setTimeout(() => { size(); draw(performance.now()); }, 150);
   });
   size();
-  if (still) draw(); else requestAnimationFrame(tick);
+  draw(0);
+  if (!still) {
+    addEventListener('pointermove', e => { pointer.x = e.clientX; pointer.y = e.clientY; pointer.on = true; }, { passive: true });
+    document.addEventListener('pointerleave', () => { pointer.on = false; });
+    addEventListener('blur', () => { pointer.on = false; });
+    /* A click or tap sends a ring of light out through the cells. */
+    addEventListener('pointerdown', e => {
+      ripples.push({ x: e.clientX, y: e.clientY, t: performance.now() });
+      if (ripples.length > 4) ripples.shift();
+    }, { passive: true });
+    requestAnimationFrame(tick);
+  }
 
   stack(still);
 })();

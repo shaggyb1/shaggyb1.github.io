@@ -9,6 +9,9 @@
   --serif: "Geist", system-ui, "Segoe UI", sans-serif;
   --display: "Geist", system-ui, sans-serif;
   --mono: "Geist Mono", ui-monospace, Consolas, monospace;
+  /* Honeycomb tiles for hover states, matching the background. */
+  --hex: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='17.32' height='30'%3E%3Cpath d='M8.66 0 17.32 5v10L8.66 20 0 15V5zM8.66 20v10' fill='none' stroke='%237fb0ff' stroke-opacity='.35'/%3E%3C/svg%3E");
+  --hex-soft: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='17.32' height='30'%3E%3Cpath d='M8.66 0 17.32 5v10L8.66 20 0 15V5zM8.66 20v10' fill='none' stroke='%237fb0ff' stroke-opacity='.13'/%3E%3C/svg%3E");
 }
 
 * { box-sizing: border-box; }
@@ -112,6 +115,8 @@ h3 { font-family: var(--display); font-weight: 750; line-height: 1.1; }
 .small { margin: 0; background: var(--surface); border: 1px solid var(--rule); border-radius: 12px; overflow: hidden; padding: 0 20px 20px; -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); }
 .small .p-shot { width: calc(100% + 40px); max-width: none; margin: 0 -20px 16px; border: 0; border-bottom: 1px solid var(--rule); }
 .small > .p-head:first-child { margin-top: 20px; }
+.small { transition: border-color .25s, background-color .25s; }
+.small:hover { border-color: var(--p); background-image: var(--hex-soft); background-size: 17.32px 30px; }
 .p-note { margin-top: 12px; font-size: 18px; }
 
 .try { margin-top: 14px; }
@@ -128,17 +133,27 @@ h3 { font-family: var(--display); font-weight: 750; line-height: 1.1; }
   background: transparent; color: var(--ink); border: 1px solid var(--rule); border-radius: 8px;
   padding: 10px 18px; font: 500 15px var(--serif);
 }
+.btn, .filter, .stack-mode { transition: border-color .2s, color .2s, background-color .2s; }
+.btn:hover, .filter:hover, .stack-mode:hover { background-color: rgba(127, 176, 255, .06); background-image: var(--hex); background-size: 17.32px 30px; }
 .btn:hover { border-color: var(--link); color: var(--link); }
 .btn.primary { background: var(--link); border-color: var(--link); color: #071022; }
 .btn.primary:hover { background: var(--ink); border-color: var(--ink); color: #071022; }
 .hero-buttons { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 22px; }
 .filters { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 30px; }
 .filter { cursor: pointer; background: transparent; border: 1px solid var(--rule); border-radius: 8px; padding: 6px 15px; font-size: 17px; }
-.filter:hover { background: var(--surface); }
+.filter:hover { border-color: var(--link); }
 .filter[aria-pressed="true"] { background: var(--link); border-color: var(--link); color: #071022; }
 .skill-grid { list-style: none; margin: 0 0 26px; padding: 0; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 18px 10px; }
 .skill-grid li { display: flex; flex-direction: column; align-items: center; gap: 7px; text-align: center; font-size: 15px; line-height: 1.2; }
-.skill-grid img { width: 62px; height: 62px; padding: 14px; border-radius: 50%; background: var(--ink); border: 1px solid var(--rule); }
+.skill-grid img {
+  width: 62px; height: 72px; padding: 17px 14px; background: var(--ink);
+  clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%);
+  transition: transform .25s ease, background-color .25s;
+}
+.skill-grid li:hover img { background: #cfe0ff; }
+@media (prefers-reduced-motion: no-preference) {
+  .skill-grid li:hover img { transform: translateY(-4px) scale(1.06); }
+}
 .skill-lines { max-width: 760px; }
 .skill-lines > div { display: grid; grid-template-columns: 170px 1fr; gap: 2px 14px; padding: 8px 0; border-top: 1px solid var(--rule); }
 .skill-lines dt { font-weight: 600; }
