@@ -48,7 +48,7 @@ a:hover { color: var(--ink); }
 .intro + .intro { margin-top: 10px; }
 .intro a { color: var(--link); }
 
-/* The text comes up first, then the system map fades in beside it. */
+/* The text comes up first, then the stack fades in beside it. */
 @media (prefers-reduced-motion: no-preference) {
   .hero-text > *, .hero-visual { animation: hero-in .7s cubic-bezier(.2, .7, .1, 1) both; }
   .hero-text > :nth-child(2) { animation-delay: .08s; }
