@@ -205,7 +205,8 @@
   });
   builtW = innerWidth; builtH = innerHeight;
   build();
-  loadPhotos();
+  /* The photos are decoration, so they wait until the page itself (text, project screenshots) has loaded. */
+  if (document.readyState === 'complete') loadPhotos(); else addEventListener('load', loadPhotos, { once: true });
   scrollTarget();
   camShown = cam;
   draw(0);
