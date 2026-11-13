@@ -1,104 +1,51 @@
-/* A field of large raised hexagon prisms behind the page. Prisms near the pointer rise and their tops turn gold;
-   a click sends a wave outward. Also starts the 3D stack in the hero. */
+/* Slow particles behind the page, and the 3D stack in the hero. */
 (function background() {
   const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const canvas = document.getElementById('bg-honeycomb');
+  const canvas = document.getElementById('bg-particles');
   const c = canvas.getContext('2d');
-  const NAVY = [14, 22, 46], SIDE = [20, 30, 62], SIDE_HOT = [90, 70, 30], TOP_HOT = [60, 48, 22];
-  const BLUE = [127, 176, 255], GOLD = [245, 196, 81];
-  let W = 0, H = 0, R = 46, cells = [], ripples = [];
-  const pointer = { x: 0, y: 0, on: false };
-
-  const mix = (a, b, t) => a.map((v, i) => Math.round(v + (b[i] - v) * t));
-  const rgba = (col, a) => 'rgba(' + col[0] + ', ' + col[1] + ', ' + col[2] + ', ' + a.toFixed(3) + ')';
-  function corners(x, y, r) {
-    const p = [];
-    for (let k = 0; k < 6; k++) {
-      const a = Math.PI / 3 * k - Math.PI / 2;
-      p.push([x + r * Math.cos(a), y + r * Math.sin(a)]);
-    }
-    return p;
-  }
-  function fill(points, color) {
-    c.beginPath();
-    points.forEach(([x, y], i) => (i ? c.lineTo(x, y) : c.moveTo(x, y)));
-    c.closePath();
-    c.fillStyle = color;
-    c.fill();
-  }
+  let W = 0, H = 0, dots = [];
 
   function size() {
     const dpr = Math.min(devicePixelRatio || 1, 2);
     W = innerWidth; H = innerHeight;
-    R = W < 760 ? 32 : 46;
     canvas.width = W * dpr; canvas.height = H * dpr;
     c.setTransform(dpr, 0, 0, dpr, 0, 0);
-    const w = Math.sqrt(3) * R, step = 1.5 * R;
-    cells = [];
-    for (let row = 0, y = -R; y < H + R * 2; row++, y += step) {
-      for (let x = row % 2 ? w / 2 : 0; x < W + w; x += w) {
-        /* About one cell in eight catches a faint gold shine, like honey in the light. */
-        cells.push({ x, y, lift: 0, shine: Math.random() < .12 ? .35 : 0 });
-      }
-    }
+    const count = W < 760 ? 16 : 34;
+    dots = Array.from({ length: count }, () => ({
+      x: Math.random() * W, y: Math.random() * H,
+      vx: (Math.random() - .5) * .1, vy: (Math.random() - .5) * .1,
+      r: .6 + Math.random() * 1, a: .15 + Math.random() * .35
+    }));
   }
-
-  function draw(t) {
+  function draw() {
     c.clearRect(0, 0, W, H);
-    ripples = ripples.filter(r => t - r.t < 1600);
-    for (const cell of cells) {
-      let target = 0;
-      if (pointer.on) target = Math.max(0, 1 - Math.hypot(cell.x - pointer.x, cell.y - pointer.y) / 170);
-      for (const r of ripples) {
-        const ring = (t - r.t) * .5, d = Math.hypot(cell.x - r.x, cell.y - r.y);
-        target = Math.max(target, (1 - Math.abs(d - ring) / 60) * (1 - (t - r.t) / 1600));
-      }
-      cell.lift += (Math.max(0, target) - cell.lift) * (still ? 1 : .14);
-      const v = cell.lift;
-      /* Cells fade toward the left so the text there stays easy to read. */
-      const side = W < 760 ? .45 : Math.min(1, Math.max(.25, cell.x / (W * .55)));
-      const gold = Math.min(1, v + cell.shine * side);
-      const lift = 5 + v * 16, r = R - 3;
-      const base = corners(cell.x, cell.y, r), top = corners(cell.x, cell.y - lift, r);
-      c.globalAlpha = .38 + side * .37;
-      fill(base, rgba(mix(SIDE, SIDE_HOT, v), 1));
-      [[1, 2, 1], [2, 3, .8], [3, 4, .65], [4, 5, .5]].forEach(([a, b, shade]) =>
-        fill([top[a], top[b], base[b], base[a]], rgba(mix(SIDE, SIDE_HOT, v).map(x => x * shade + 6), 1)));
-      fill(top, rgba(mix(NAVY, TOP_HOT, gold * .9), 1));
-      c.strokeStyle = rgba(mix(BLUE, GOLD, gold), (.12 + v * .7) * side + .05);
-      c.lineWidth = 1;
-      c.stroke();
+    for (const d of dots) {
+      d.x = (d.x + d.vx + W) % W;
+      d.y = (d.y + d.vy + H) % H;
+      c.globalAlpha = d.a;
+      c.fillStyle = '#a9c1ff';
+      c.beginPath();
+      c.arc(d.x, d.y, d.r, 0, 6.283);
+      c.fill();
     }
-    c.globalAlpha = 1;
   }
 
-  let last = 0, idle = 0;
+  let last = 0;
   function tick(t) {
     requestAnimationFrame(tick);
-    if (t - last < 33 || document.hidden) return;
-    /* Nothing moves once the cells have settled, so stop redrawing until the pointer moves again. */
-    if (!pointer.on && !ripples.length && cells.every(k => k.lift < .002)) { if (idle++ > 2) return; } else idle = 0;
+    /* 24 frames a second is plenty for dots this slow, and saves battery. */
+    if (t - last < 41 || document.hidden) return;
     last = t;
-    draw(t);
+    draw();
   }
 
   let resizeTimer;
   addEventListener('resize', () => {
     clearTimeout(resizeTimer);
-    resizeTimer = setTimeout(() => { size(); draw(performance.now()); }, 150);
+    resizeTimer = setTimeout(() => { size(); if (still) draw(); }, 150);
   });
   size();
-  draw(0);
-  if (!still) {
-    addEventListener('pointermove', e => { pointer.x = e.clientX; pointer.y = e.clientY; pointer.on = true; }, { passive: true });
-    document.addEventListener('pointerleave', () => { pointer.on = false; });
-    addEventListener('blur', () => { pointer.on = false; });
-    addEventListener('pointerdown', e => {
-      ripples.push({ x: e.clientX, y: e.clientY, t: performance.now() });
-      if (ripples.length > 4) ripples.shift();
-    }, { passive: true });
-    requestAnimationFrame(tick);
-  }
+  if (still) draw(); else requestAnimationFrame(tick);
 
   stack(still);
 })();
