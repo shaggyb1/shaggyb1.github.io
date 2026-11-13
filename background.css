@@ -1,32 +1,24 @@
 /* Page background and hero visual. Remove this file, background.js and the .bg block in index.html to go back to a plain page. */
 
-.bg { position: fixed; inset: 0; z-index: -1; overflow: hidden; background: #0a0f1e; pointer-events: none; }
-
-.bg-glow { position: absolute; border-radius: 50%; filter: blur(70px); will-change: transform; }
-.bg-glow.blue { width: 52vw; height: 52vw; top: -18vw; right: -10vw; background: rgba(62, 116, 255, .2); }
-.bg-glow.violet { width: 40vw; height: 40vw; top: 34vh; right: 16vw; background: rgba(132, 92, 255, .13); }
-
-.bg-grid {
-  position: absolute; inset: 0;
-  background-image:
-    linear-gradient(rgba(150, 175, 255, .055) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(150, 175, 255, .055) 1px, transparent 1px);
-  background-size: 56px 56px;
-  -webkit-mask-image: radial-gradient(ellipse 75% 80% at 72% 22%, #000, transparent 75%);
-  mask-image: radial-gradient(ellipse 75% 80% at 72% 22%, #000, transparent 75%);
+.bg {
+  position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none;
+  background: radial-gradient(ellipse 90% 70% at 72% 18%, #0b1330 0%, #060a1a 45%, #03040b 100%);
 }
-#bg-particles { position: absolute; inset: 0; width: 100%; height: 100%; }
 
-.bg-code { position: absolute; margin: 0; font: 12px/1.7 var(--mono); color: #a9bcff; opacity: .1; white-space: pre; }
-.bg-code.one { right: 4vw; top: 74vh; }
-.bg-code.two { left: 3vw; bottom: 5vh; }
+/* Soft nebula clouds. They drift very slowly and blend like light, not paint. */
+.nebula { position: absolute; border-radius: 50%; filter: blur(80px); mix-blend-mode: screen; will-change: transform; }
+.nebula.blue { width: 58vw; height: 44vw; top: -16vw; right: -14vw; background: rgba(56, 98, 255, .24); }
+.nebula.violet { width: 42vw; height: 32vw; top: 32vh; right: 12vw; background: rgba(140, 80, 255, .17); }
+.nebula.warm { width: 34vw; height: 26vw; bottom: -12vw; left: -8vw; background: rgba(255, 170, 90, .07); }
+#bg-space { position: absolute; inset: 0; width: 100%; height: 100%; }
 
 @media (prefers-reduced-motion: no-preference) {
-  .bg-glow.blue { animation: glow-a 26s ease-in-out infinite alternate; }
-  .bg-glow.violet { animation: glow-b 32s ease-in-out infinite alternate; }
+  .nebula.blue { animation: drift-a 40s ease-in-out infinite alternate; }
+  .nebula.violet { animation: drift-b 52s ease-in-out infinite alternate; }
+  .nebula.warm { animation: drift-a 60s ease-in-out infinite alternate-reverse; }
 }
-@keyframes glow-a { to { transform: translate(-7vw, 6vh) scale(1.1); } }
-@keyframes glow-b { to { transform: translate(8vw, -7vh) scale(.92); } }
+@keyframes drift-a { to { transform: translate(-6vw, 5vh) scale(1.08); } }
+@keyframes drift-b { to { transform: translate(7vw, -6vh) scale(.94); } }
 
 /* Hero visual: the stack I build, as 3D layers. Hover a layer to lift it; switch to see projects instead of skills. */
 .hero-visual { position: relative; min-width: 0; --gap: 58px; --plate: 210px; }
@@ -84,9 +76,8 @@
 
 @media (max-width: 760px) {
   .top nav { gap: 4px 14px; font-size: 15px; justify-content: flex-start; }
-  .bg-code { display: none; }
   .hero-visual { --gap: 44px; --plate: 170px; }
   .stack-scene { height: 300px; }
-  .bg-glow.blue { width: 110vw; height: 110vw; top: -60vw; right: -50vw; }
-  .bg-glow.violet { width: 80vw; height: 80vw; top: 60vh; right: -30vw; }
+  .nebula.blue { width: 120vw; height: 100vw; top: -60vw; right: -50vw; }
+  .nebula.violet { width: 90vw; height: 70vw; top: 55vh; right: -35vw; }
 }
