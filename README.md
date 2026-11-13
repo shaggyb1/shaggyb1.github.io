@@ -1,6 +1,6 @@
 # Bhushan Kumbhare, portfolio
 
-My portfolio site: **https://shaggyb1.github.io**
+My portfolio site: **https://shaggyb1.github.io/portfolio/**
 
 Plain HTML, CSS and JavaScript with no build step. All the content (projects, links and skills) is in `data.js`, and the small interactive demos are in `demos.js`.
 
