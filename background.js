@@ -1,88 +1,83 @@
-/* A honeycomb behind the page that lights up around the pointer, a few slow particles, and the 3D stack in the hero. */
+/* A field of large raised hexagon prisms behind the page. Prisms near the pointer rise and their tops turn gold;
+   a click sends a wave outward. Also starts the 3D stack in the hero. */
 (function background() {
   const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const canvas = document.getElementById('bg-honeycomb');
   const c = canvas.getContext('2d');
-  const grid = document.createElement('canvas');
-  const g = grid.getContext('2d');
-  let W = 0, H = 0, R = 26, cells = [], dots = [], ripples = [];
+  const NAVY = [14, 22, 46], SIDE = [20, 30, 62], SIDE_HOT = [90, 70, 30], TOP_HOT = [60, 48, 22];
+  const BLUE = [127, 176, 255], GOLD = [245, 196, 81];
+  let W = 0, H = 0, R = 46, cells = [], ripples = [];
   const pointer = { x: 0, y: 0, on: false };
 
-  function hexPath(ctx, x, y, r) {
-    ctx.beginPath();
+  const mix = (a, b, t) => a.map((v, i) => Math.round(v + (b[i] - v) * t));
+  const rgba = (col, a) => 'rgba(' + col[0] + ', ' + col[1] + ', ' + col[2] + ', ' + a.toFixed(3) + ')';
+  function corners(x, y, r) {
+    const p = [];
     for (let k = 0; k < 6; k++) {
       const a = Math.PI / 3 * k - Math.PI / 2;
-      ctx.lineTo(x + r * Math.cos(a), y + r * Math.sin(a));
+      p.push([x + r * Math.cos(a), y + r * Math.sin(a)]);
     }
-    ctx.closePath();
+    return p;
+  }
+  function fill(points, color) {
+    c.beginPath();
+    points.forEach(([x, y], i) => (i ? c.lineTo(x, y) : c.moveTo(x, y)));
+    c.closePath();
+    c.fillStyle = color;
+    c.fill();
   }
 
-  /* The plain grid never changes, so it is drawn once per resize onto a second canvas.
-     It is brightest at the top right, under the glow, and fades out toward the bottom left. */
   function size() {
     const dpr = Math.min(devicePixelRatio || 1, 2);
     W = innerWidth; H = innerHeight;
-    R = W < 760 ? 20 : 26;
-    for (const cv of [canvas, grid]) { cv.width = W * dpr; cv.height = H * dpr; }
+    R = W < 760 ? 32 : 46;
+    canvas.width = W * dpr; canvas.height = H * dpr;
     c.setTransform(dpr, 0, 0, dpr, 0, 0);
-    g.setTransform(dpr, 0, 0, dpr, 0, 0);
-    const w = Math.sqrt(3) * R, step = 1.5 * R, far = Math.hypot(W, H);
+    const w = Math.sqrt(3) * R, step = 1.5 * R;
     cells = [];
-    g.clearRect(0, 0, W, H);
-    g.lineWidth = 1;
-    for (let row = 0, y = 0; y < H + R; row++, y += step) {
+    for (let row = 0, y = -R; y < H + R * 2; row++, y += step) {
       for (let x = row % 2 ? w / 2 : 0; x < W + w; x += w) {
-        const fade = Math.max(0, 1 - Math.hypot(x - W * .72, y - H * .2) / (far * .8));
-        g.strokeStyle = 'rgba(150, 175, 255, ' + (.025 + fade * .085).toFixed(3) + ')';
-        hexPath(g, x, y, R - 1);
-        g.stroke();
-        cells.push({ x, y, glow: 0 });
+        /* About one cell in eight catches a faint gold shine, like honey in the light. */
+        cells.push({ x, y, lift: 0, shine: Math.random() < .12 ? .35 : 0 });
       }
     }
-    const count = W < 760 ? 10 : 20;
-    dots = Array.from({ length: count }, () => ({
-      x: Math.random() * W, y: Math.random() * H,
-      vx: (Math.random() - .5) * .1, vy: (Math.random() - .5) * .1,
-      r: .6 + Math.random() * 1, a: .15 + Math.random() * .35
-    }));
   }
 
   function draw(t) {
     c.clearRect(0, 0, W, H);
-    c.drawImage(grid, 0, 0, W, H);
-    ripples = ripples.filter(r => t - r.t < 1400);
+    ripples = ripples.filter(r => t - r.t < 1600);
     for (const cell of cells) {
       let target = 0;
-      if (pointer.on) target = Math.max(0, 1 - Math.hypot(cell.x - pointer.x, cell.y - pointer.y) / 150);
+      if (pointer.on) target = Math.max(0, 1 - Math.hypot(cell.x - pointer.x, cell.y - pointer.y) / 170);
       for (const r of ripples) {
-        const ring = (t - r.t) * .55, d = Math.hypot(cell.x - r.x, cell.y - r.y);
-        target = Math.max(target, (1 - Math.abs(d - ring) / 50) * (1 - (t - r.t) / 1400));
+        const ring = (t - r.t) * .5, d = Math.hypot(cell.x - r.x, cell.y - r.y);
+        target = Math.max(target, (1 - Math.abs(d - ring) / 60) * (1 - (t - r.t) / 1600));
       }
-      cell.glow += (Math.max(0, target) - cell.glow) * .16;
-      if (cell.glow < .02) continue;
-      hexPath(c, cell.x, cell.y, R - 2);
-      c.fillStyle = 'rgba(127, 176, 255, ' + (cell.glow * .13).toFixed(3) + ')';
-      c.fill();
-      c.strokeStyle = 'rgba(167, 139, 255, ' + (cell.glow * .55).toFixed(3) + ')';
+      cell.lift += (Math.max(0, target) - cell.lift) * (still ? 1 : .14);
+      const v = cell.lift;
+      /* Cells fade toward the left so the text there stays easy to read. */
+      const side = W < 760 ? .45 : Math.min(1, Math.max(.25, cell.x / (W * .55)));
+      const gold = Math.min(1, v + cell.shine * side);
+      const lift = 5 + v * 16, r = R - 3;
+      const base = corners(cell.x, cell.y, r), top = corners(cell.x, cell.y - lift, r);
+      c.globalAlpha = .38 + side * .37;
+      fill(base, rgba(mix(SIDE, SIDE_HOT, v), 1));
+      [[1, 2, 1], [2, 3, .8], [3, 4, .65], [4, 5, .5]].forEach(([a, b, shade]) =>
+        fill([top[a], top[b], base[b], base[a]], rgba(mix(SIDE, SIDE_HOT, v).map(x => x * shade + 6), 1)));
+      fill(top, rgba(mix(NAVY, TOP_HOT, gold * .9), 1));
+      c.strokeStyle = rgba(mix(BLUE, GOLD, gold), (.12 + v * .7) * side + .05);
+      c.lineWidth = 1;
       c.stroke();
-    }
-    for (const d of dots) {
-      d.x = (d.x + d.vx + W) % W;
-      d.y = (d.y + d.vy + H) % H;
-      c.globalAlpha = d.a;
-      c.fillStyle = '#a9c1ff';
-      c.beginPath();
-      c.arc(d.x, d.y, d.r, 0, 6.283);
-      c.fill();
     }
     c.globalAlpha = 1;
   }
 
-  let last = 0;
+  let last = 0, idle = 0;
   function tick(t) {
     requestAnimationFrame(tick);
-    /* 30 frames a second keeps the glow smooth without draining battery. */
     if (t - last < 33 || document.hidden) return;
+    /* Nothing moves once the cells have settled, so stop redrawing until the pointer moves again. */
+    if (!pointer.on && !ripples.length && cells.every(k => k.lift < .002)) { if (idle++ > 2) return; } else idle = 0;
     last = t;
     draw(t);
   }
@@ -98,7 +93,6 @@
     addEventListener('pointermove', e => { pointer.x = e.clientX; pointer.y = e.clientY; pointer.on = true; }, { passive: true });
     document.addEventListener('pointerleave', () => { pointer.on = false; });
     addEventListener('blur', () => { pointer.on = false; });
-    /* A click or tap sends a ring of light out through the cells. */
     addEventListener('pointerdown', e => {
       ripples.push({ x: e.clientX, y: e.clientY, t: performance.now() });
       if (ripples.length > 4) ripples.shift();

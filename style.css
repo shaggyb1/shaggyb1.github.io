@@ -10,7 +10,7 @@
   --display: "Geist", system-ui, sans-serif;
   --mono: "Geist Mono", ui-monospace, Consolas, monospace;
   /* Honeycomb tiles for hover states, matching the background. */
-  --hex: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='17.32' height='30'%3E%3Cpath d='M8.66 0 17.32 5v10L8.66 20 0 15V5zM8.66 20v10' fill='none' stroke='%237fb0ff' stroke-opacity='.35'/%3E%3C/svg%3E");
+  --hex: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='17.32' height='30'%3E%3Cpath d='M8.66 0 17.32 5v10L8.66 20 0 15V5zM8.66 20v10' fill='none' stroke='%23f5c451' stroke-opacity='.35'/%3E%3C/svg%3E");
   --hex-soft: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='17.32' height='30'%3E%3Cpath d='M8.66 0 17.32 5v10L8.66 20 0 15V5zM8.66 20v10' fill='none' stroke='%237fb0ff' stroke-opacity='.13'/%3E%3C/svg%3E");
 }
 
@@ -52,7 +52,7 @@ a:hover { color: var(--ink); }
 .layer i { font-style: normal; color: #8a98ba; }
 .hero-name { font: 800 clamp(48px, 7vw, 80px)/.98 var(--display); letter-spacing: -.035em; }
 .hero-name span { display: block; color: #9bb8ff; }
-.hero-role { font: 500 clamp(20px, 2.2vw, 24px) var(--display); margin: 14px 0 14px; color: var(--ink); }
+.hero-role { font: 500 clamp(20px, 2.2vw, 24px) var(--display); margin: 14px 0 14px; color: #f5c451; }
 .status { margin-top: 16px; font: 400 13px var(--mono); color: #8a98ba; }
 .status span { color: #6ee7b7; }
 .intro { max-width: 520px; font-size: 17px; line-height: 1.6; color: var(--soft); }
