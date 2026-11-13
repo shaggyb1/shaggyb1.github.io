@@ -1,6 +1,7 @@
-/* A trip through space behind the page. Scrolling flies the camera forward: past a ringed planet, an ice planet
-   and a nebula, ending at a black hole at the bottom of the page. The far sky (Milky Way, a galaxy) stays put,
-   with a slight pull toward the pointer. Also starts the 3D stack in the hero. */
+/* A trip through space behind the page, made from real photos. Scrolling flies the camera forward past Saturn,
+   Jupiter and Neptune, through the Carina Nebula, to the M87 black hole at the bottom of the page. The far sky is
+   the real Milky Way and stays put, with a slight pull toward the pointer. Also starts the 3D stack in the hero.
+   Photo credits are in the footer. */
 (function background() {
   const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const canvas = document.getElementById('bg-space');
@@ -23,15 +24,87 @@
     };
   }
 
-  /* Planets, a nebula and the black hole sit at fixed depths. x is in half screen-widths from the centre, so they
-     land on screen on phones too; y and size are in screen-heights.
-     Each one stays hidden until it is closer than `show`, and they pass along the edges, so they don't sit behind text. */
+  /* Photos sit at fixed depths. x is in half screen-widths from the centre, so they land on screen on phones too;
+     y and width are in screen-heights. Each one stays hidden until it is closer than `show`, and they pass along
+     the edges, so they don't sit behind text. All the photos are on black, and they are drawn with "screen"
+     blending, which makes the black see-through. */
   const BODIES = [
-    { z: 1.9, x: .7, y: -.22, r: .07, kind: 'ringed', show: 2.3 },
-    { z: 2.7, x: -.75, y: .28, r: .05, kind: 'ice', show: 2.3 },
-    { z: 3.1, x: .25, y: .1, r: .3, kind: 'nebula', show: 2.6 },
-    { z: TRAVEL + .55, x: .2, y: -.02, r: .085, kind: 'hole', show: 2.2 }
+    { z: 1.7, x: .62, y: -.2, w: .5, src: 'saturn', show: 2.3 },
+    { z: 2.35, x: -.72, y: .22, w: .26, src: 'jupiter', show: 2.3 },
+    { z: 2.9, x: .7, y: .16, w: .24, src: 'neptune', show: 2.3 },
+    { z: 3.3, x: .1, y: 0, w: 1.5, src: 'carina', show: 2.7, alpha: .55 },
+    { z: TRAVEL + .55, x: .2, y: -.02, w: .62, src: 'black-hole', show: 1.3, hole: true }
   ];
+  const photos = {};
+  function loadPhotos() {
+    for (const name of ['milky-way', 'saturn', 'jupiter', 'neptune', 'carina', 'black-hole']) {
+      const img = new Image();
+      img.decoding = 'async';
+      img.onload = () => {
+        /* The nebula and black hole photos are not on pure black, so their edges are faded out once here. */
+        photos[name] = name === 'milky-way' ? band(img) : name === 'carina' || name === 'black-hole' ? feather(img) : img;
+        if (name === 'milky-way') { paintSky(); draw(performance.now()); }
+      };
+      img.src = 'assets/space/' + name + '.jpg';
+    }
+  }
+  function feather(img) {
+    const f = document.createElement('canvas'), g = f.getContext('2d');
+    f.width = img.width; f.height = img.height;
+    g.drawImage(img, 0, 0);
+    g.globalCompositeOperation = 'destination-in';
+    /* An oval fade that reaches zero at every edge. */
+    g.translate(f.width / 2, f.height / 2);
+    g.scale(1, f.height / f.width);
+    const m = g.createRadialGradient(0, 0, f.width * .12, 0, 0, f.width * .49);
+    m.addColorStop(0, '#000');
+    m.addColorStop(1, 'rgba(0, 0, 0, 0)');
+    g.fillStyle = m;
+    g.fillRect(-f.width / 2, -f.width / 2, f.width, f.width);
+    return f;
+  }
+
+  /* The middle of the Milky Way panorama, with its edges faded so no straight line shows. */
+  function band(img) {
+    const f = document.createElement('canvas'), g = f.getContext('2d');
+    f.width = img.width * .64; f.height = img.height * .5;
+    g.drawImage(img, img.width * .18, img.height * .25, f.width, f.height, 0, 0, f.width, f.height);
+    g.globalCompositeOperation = 'destination-in';
+    for (const [x1, y1] of [[0, f.height], [f.width, 0]]) {
+      const m = g.createLinearGradient(0, 0, x1, y1);
+      m.addColorStop(0, 'rgba(0, 0, 0, 0)');
+      m.addColorStop(.25, '#000');
+      m.addColorStop(.75, '#000');
+      m.addColorStop(1, 'rgba(0, 0, 0, 0)');
+      g.fillStyle = m;
+      g.fillRect(0, 0, f.width, f.height);
+    }
+    return f;
+  }
+
+  /* The far sky: the middle of ESO's Milky Way panorama, tilted into a diagonal band, over a few faint stars. */
+  function paintSky() {
+    const rnd = seeded(11);
+    s.clearRect(0, 0, W, H);
+    for (let i = 0, n = Math.round(W * H / 2600); i < n; i++) {
+      s.globalAlpha = .12 + rnd() * .4;
+      s.fillStyle = COLORS[rnd() * COLORS.length | 0];
+      s.fillRect(rnd() * W, rnd() * H, .9, .9);
+    }
+    const mw = photos['milky-way'];
+    if (mw) {
+      s.save();
+      s.globalAlpha = W < 760 ? .4 : .55;
+      s.globalCompositeOperation = 'screen';
+      /* The bright core of the galaxy sits right of centre, away from the text column. */
+      s.translate(W < 760 ? W * .6 : W * .68, H * .42);
+      s.rotate(-Math.atan2(H, W * 1.2));
+      const span = Math.hypot(W, H) * 1.1, tall = span * .5;
+      s.drawImage(mw, -span / 2, -tall / 2, span, tall);
+      s.restore();
+    }
+    s.globalAlpha = 1;
+  }
 
   function build() {
     const dpr = Math.min(devicePixelRatio || 1, 2);
@@ -41,48 +114,7 @@
     sky.width = W * dpr; sky.height = H * dpr;
     s.setTransform(dpr, 0, 0, dpr, 0, 0);
     const rnd = seeded(7);
-
-    /* The far sky: the Milky Way as a soft diagonal band, thick with faint stars, and a small spiral galaxy. */
-    s.clearRect(0, 0, W, H);
-    s.save();
-    s.translate(W / 2, H / 2);
-    s.rotate(-Math.atan2(H, W * 1.2));
-    const band = s.createLinearGradient(0, -H * .22, 0, H * .22);
-    band.addColorStop(0, 'rgba(150, 170, 255, 0)');
-    band.addColorStop(.42, 'rgba(170, 185, 255, .1)');
-    band.addColorStop(.5, 'rgba(230, 220, 255, .16)');
-    band.addColorStop(.58, 'rgba(170, 185, 255, .1)');
-    band.addColorStop(1, 'rgba(150, 170, 255, 0)');
-    s.fillStyle = band;
-    s.fillRect(-W, -H * .22, W * 2, H * .44);
-    s.restore();
-    for (let i = 0, n = Math.round(W * H / 1400); i < n; i++) {
-      const t = rnd(), off = (rnd() + rnd() + rnd() - 1.5) * H * .14;
-      const inBand = rnd() < .6;
-      const x = inBand ? -.1 * W + t * 1.2 * W + off * .6 : rnd() * W;
-      const y = inBand ? .95 * H - t * H + off : rnd() * H;
-      s.globalAlpha = .12 + rnd() * .45;
-      s.fillStyle = COLORS[rnd() * COLORS.length | 0];
-      s.fillRect(x, y, rnd() < .9 ? .8 : 1.3, rnd() < .9 ? .8 : 1.3);
-    }
-    s.save();
-    s.translate(W * .88, H * .86);
-    s.rotate(-.5);
-    s.scale(1, .42);
-    const size = Math.min(W, H) * .1, core = s.createRadialGradient(0, 0, 0, 0, 0, size * .35);
-    core.addColorStop(0, 'rgba(255, 236, 200, .55)');
-    core.addColorStop(1, 'rgba(255, 236, 200, 0)');
-    s.globalAlpha = 1;
-    s.fillStyle = core;
-    s.fillRect(-size, -size, size * 2, size * 2);
-    for (let i = 0; i < 900; i++) {
-      const d = Math.pow(rnd(), .7) * size, a = d / size * 5.5 + (i % 2) * Math.PI + (rnd() - .5) * .7;
-      s.globalAlpha = (1 - d / size) * .5;
-      s.fillStyle = d < size * .25 ? '#ffe9c4' : '#b9c8ff';
-      s.fillRect(Math.cos(a) * d, Math.sin(a) * d, 1, 1);
-    }
-    s.restore();
-    s.globalAlpha = 1;
+    paintSky();
 
     /* Stars in 3D. They repeat every DEPTH units, so flying forward never runs out of stars. */
     const spreadX = W / 2 / F * DEPTH, spreadY = H / 2 / F * DEPTH;
@@ -94,110 +126,6 @@
 
   function project(x, y, rel) {
     return [W / 2 - look.x * 24 + x / rel * F, H / 2 - look.y * 16 + y / rel * F];
-  }
-
-  function sphere(x, y, r, light, mid, dark) {
-    const g = c.createRadialGradient(x - r * .4, y - r * .45, r * .1, x, y, r);
-    g.addColorStop(0, light);
-    g.addColorStop(.55, mid);
-    g.addColorStop(1, dark);
-    c.fillStyle = g;
-    c.beginPath();
-    c.arc(x, y, r, 0, 6.283);
-    c.fill();
-  }
-
-  function ring(x, y, r, from, to, alpha) {
-    c.save();
-    c.translate(x, y);
-    c.rotate(-.35);
-    c.scale(1, .28);
-    c.globalAlpha *= alpha;
-    for (const [rr, col, w] of [[1.75, '#e9d3a6', .18], [2.05, '#c7a978', .12], [2.3, '#8f7a5a', .08]]) {
-      c.strokeStyle = col;
-      c.lineWidth = r * w * 3.4;
-      c.beginPath();
-      c.arc(0, 0, r * rr, from, to);
-      c.stroke();
-    }
-    c.restore();
-  }
-
-  function blackHole(x, y, r, t) {
-    const halo = c.createRadialGradient(x, y, r, x, y, r * 4);
-    halo.addColorStop(0, 'rgba(255, 170, 70, .35)');
-    halo.addColorStop(.4, 'rgba(255, 120, 40, .1)');
-    halo.addColorStop(1, 'rgba(255, 120, 40, 0)');
-    c.fillStyle = halo;
-    c.fillRect(x - r * 4, y - r * 4, r * 8, r * 8);
-    const disk = (from, to) => {
-      c.save();
-      c.translate(x, y);
-      c.rotate(-.12);
-      c.scale(1, .24);
-      /* Keep this half of the disk, streaks included, on its own side of the hole. */
-      c.beginPath();
-      c.rect(-r * 4, from === 0 ? 0 : -r * 4, r * 8, r * 4);
-      c.clip();
-      const g = c.createRadialGradient(0, 0, r * 1.15, 0, 0, r * 3.1);
-      g.addColorStop(0, 'rgba(255, 246, 220, .95)');
-      g.addColorStop(.35, 'rgba(255, 196, 92, .8)');
-      g.addColorStop(.75, 'rgba(214, 102, 40, .35)');
-      g.addColorStop(1, 'rgba(160, 60, 30, 0)');
-      c.fillStyle = g;
-      c.beginPath();
-      c.arc(0, 0, r * 3.1, from, to);
-      c.arc(0, 0, r * 1.15, to, from, true);
-      c.fill();
-      /* Hot streaks circling in the disk. */
-      c.strokeStyle = 'rgba(255, 240, 210, .2)';
-      c.lineWidth = r * .05 / .24;
-      for (let k = 0; k < 7; k++) {
-        const rr = r * (1.35 + k * .15), a = t * (1.6 - k * .15) + k;
-        c.beginPath();
-        c.arc(0, 0, rr, a, a + .6);
-        c.stroke();
-      }
-      c.restore();
-    };
-    disk(Math.PI, Math.PI * 2);
-    /* Light from the far side of the disk bends up over the hole, which makes the arc on top. */
-    c.save();
-    c.translate(x, y);
-    c.scale(1, .9);
-    const arc = c.createRadialGradient(0, 0, r * 1.1, 0, 0, r * 1.75);
-    arc.addColorStop(0, 'rgba(255, 236, 190, .85)');
-    arc.addColorStop(.5, 'rgba(255, 180, 80, .45)');
-    arc.addColorStop(1, 'rgba(255, 140, 50, 0)');
-    c.fillStyle = arc;
-    c.beginPath();
-    c.arc(0, 0, r * 1.75, Math.PI, Math.PI * 2);
-    c.arc(0, 0, r * 1.1, Math.PI * 2, Math.PI, true);
-    c.fill();
-    c.restore();
-    /* The thin bright ring right at the edge of the hole. */
-    c.strokeStyle = 'rgba(255, 214, 140, .9)';
-    c.lineWidth = r * .1;
-    c.beginPath();
-    c.arc(x, y, r * 1.12, 0, 6.283);
-    c.stroke();
-    c.fillStyle = '#000';
-    c.beginPath();
-    c.arc(x, y, r, 0, 6.283);
-    c.fill();
-    disk(0, Math.PI);
-  }
-
-  function nebula(x, y, r) {
-    c.globalCompositeOperation = 'lighter';
-    for (const [dx, dy, rr, col] of [[0, 0, 1, '120, 80, 255'], [.35, -.2, .7, '40, 160, 255'], [-.3, .25, .6, '255, 90, 170'], [.1, .3, .5, '255, 190, 90']]) {
-      const g = c.createRadialGradient(x + dx * r, y + dy * r, 0, x + dx * r, y + dy * r, rr * r);
-      g.addColorStop(0, 'rgba(' + col + ', .22)');
-      g.addColorStop(1, 'rgba(' + col + ', 0)');
-      c.fillStyle = g;
-      c.fillRect(x + dx * r - rr * r, y + dy * r - rr * r, rr * r * 2, rr * r * 2);
-    }
-    c.globalCompositeOperation = 'source-over';
   }
 
   function draw(t) {
@@ -219,7 +147,8 @@
       c.globalAlpha = Math.min(1, .3 + near * 1.1) * twinkle;
       c.fillStyle = c.strokeStyle = st.color;
       if (Math.abs(speed) > .002 && rel > .2) {
-        const [px, py] = project(st.x, st.y, rel + speed * 8);
+        /* Capped, so a fast fling doesn't smear the whole screen. */
+        const [px, py] = project(st.x, st.y, rel + Math.max(-.2, Math.min(.2, speed * 8)));
         c.lineWidth = r;
         c.beginPath();
         c.moveTo(px, py);
@@ -232,30 +161,20 @@
       }
     }
 
-    /* Planets, the nebula and the black hole, farthest first. Bodies fade as they rush past the camera. */
-    const bodies = BODIES.map(b => ({ ...b, rel: b.z - camShown })).filter(b => b.rel > .06).sort((a, b) => b.rel - a.rel);
+    /* The photos, farthest first. They fade in as they approach and fade out as they rush past the camera. */
+    const bodies = BODIES.map(b => ({ ...b, rel: b.z - camShown })).filter(b => b.rel > .06 && photos[b.src]).sort((a, b) => b.rel - a.rel);
+    c.globalCompositeOperation = 'screen';
     for (const b of bodies) {
-      /* On phones the text fills the width, so bodies are smaller and the black hole settles lower, near the footer. */
-      const phone = W < 760, lower = phone && b.kind === 'hole' ? .26 : 0;
+      /* On phones the text fills the width, so photos are smaller and the black hole settles lower, near the footer. */
+      const phone = W < 760, lower = phone && b.hole ? .17 : 0;
+      const img = photos[b.src], w = b.w * F / b.rel * (phone ? .6 : 1), h = w * img.height / img.width;
       const x = W / 2 - look.x * 24 + b.x * W / 2 / b.rel, y = H / 2 - look.y * 16 + (b.y + lower) * F / b.rel;
-      const r = b.r * F / b.rel * (phone ? .6 : 1);
-      if (x + r * 4 < 0 || x - r * 4 > W || y + r * 4 < 0 || y - r * 4 > H) continue;
-      c.globalAlpha = Math.min(1, (b.rel - .06) / .3) * Math.min(1, Math.max(0, (b.show - b.rel) / .8));
-      if (W < 760) c.globalAlpha *= .75;
+      if (x + w / 2 < 0 || x - w / 2 > W || y + h / 2 < 0 || y - h / 2 > H) continue;
+      c.globalAlpha = Math.min(1, (b.rel - .06) / .3) * Math.min(1, Math.max(0, (b.show - b.rel) / .8)) * (b.alpha || 1) * (phone ? .75 : 1);
       if (c.globalAlpha <= 0) continue;
-      if (b.kind === 'ringed') {
-        ring(x, y, r, Math.PI, Math.PI * 2, 1);
-        sphere(x, y, r, '#f6e2b8', '#c9925a', '#3a2412');
-        ring(x, y, r, 0, Math.PI, 1);
-      } else if (b.kind === 'ice') {
-        sphere(x, y, r, '#e6f4ff', '#5ea8e8', '#0b2347');
-        sphere(x + r * 1.9, y - r * .8, r * .27, '#f2f2f2', '#9aa3ad', '#2b3036');
-      } else if (b.kind === 'nebula') {
-        nebula(x, y, r);
-      } else {
-        blackHole(x, y, r, still ? 0 : t / 1000);
-      }
+      c.drawImage(img, x - w / 2, y - h / 2, w, h);
     }
+    c.globalCompositeOperation = 'source-over';
     c.globalAlpha = 1;
   }
 
@@ -286,6 +205,7 @@
   });
   builtW = innerWidth; builtH = innerHeight;
   build();
+  loadPhotos();
   scrollTarget();
   camShown = cam;
   draw(0);
