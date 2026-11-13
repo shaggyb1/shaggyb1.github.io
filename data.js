@@ -3,11 +3,12 @@
    repo: the GitHub link. private:true tells visitors to ask for a walkthrough, because they get a 404 otherwise.
    sample: a public repo with part of a private project's code.
    video: a demo video file, like 'assets/upsoar-demo.mp4'. Leave it null and the screenshot shows instead.
+   layers: the parts of the stack I built, shown as chips on the card.
    feature:true gives a project the large layout with sections. */
 
 const PROJECTS = [
   {
-    id: 'upsoar', tags: ['Live', 'AI'], feature: true, name: 'Upsoar', logo: 'assets/logos/upsoar.svg', shot: 'assets/shots/upsoar.jpg',
+    id: 'upsoar', tags: ['Live', 'AI'], layers: ['ui', 'api', 'ai', 'db', 'billing'], feature: true, name: 'Upsoar', logo: 'assets/logos/upsoar.svg', shot: 'assets/shots/upsoar.jpg',
     accent: '#2ee6ff', video: null,
     kind: 'AI social media manager', status: 'Live, with paying users',
     line: 'You tell it what you want, like "plan next week", and its agent, Mello, drafts and schedules the posts.',
@@ -30,7 +31,7 @@ const PROJECTS = [
     demo: 'upsoar', demoTitle: 'Ask Mello', demoNote: 'Scripted, not the live agent.'
   },
   {
-    id: 'tradewire', tags: ['Live', 'Mobile'], feature: true, name: 'TradeWire', logo: 'assets/logos/tradewire.png', shot: 'assets/shots/tradewire.jpg',
+    id: 'tradewire', tags: ['Live', 'Mobile'], layers: ['ui', 'mobile', 'api'], feature: true, name: 'TradeWire', logo: 'assets/logos/tradewire.png', shot: 'assets/shots/tradewire.jpg',
     accent: '#7df0a0',
     kind: 'Market news for Indian traders', status: 'In trial, Android and web',
     line: 'I built this for my own trading. It reads RBI, SEBI, NSE, BSE, the US Fed and other official sources directly, then tags each headline by likely impact.',
@@ -54,7 +55,7 @@ const PROJECTS = [
     demo: 'tradewire', demoTitle: 'Tag a headline', demoNote: 'A small sample of keyword rules. Not investment advice.'
   },
   {
-    id: 'distributor', tags: ['Mobile', 'AI', 'Business'], name: 'Local Distributor', logo: 'assets/logos/local-distributor.svg', shot: 'assets/shots/distributor.jpg',
+    id: 'distributor', tags: ['Mobile', 'AI', 'Business'], layers: ['ui', 'mobile', 'ai', 'db'], name: 'Local Distributor', logo: 'assets/logos/local-distributor.svg', shot: 'assets/shots/distributor.jpg',
     accent: '#f4c430',
     kind: 'Grocery delivery for villages near Narkhed and Katol', status: 'Two Android apps and a website',
     note: 'A shop app, a seller app and a website in 13 Indian languages. The main feature is Parchi: you write or speak a list the way you\'d tell a shopkeeper, and it becomes a cart. If Firebase isn\'t set up, orders still work over WhatsApp.',
@@ -64,7 +65,7 @@ const PROJECTS = [
     demo: 'parchi', demoTitle: 'Write a parchi', demoNote: 'It knows a short word list. Try your own shopping list.'
   },
   {
-    id: 'naad', tags: [], name: 'Naad Music', logo: 'assets/logos/naad.svg', shot: 'assets/shots/naad.jpg',
+    id: 'naad', tags: [], layers: ['ui', 'api', 'db'], name: 'Naad Music', logo: 'assets/logos/naad.svg', shot: 'assets/shots/naad.jpg',
     accent: '#f77fa8',
     kind: 'Ad-free music player', status: 'In progress',
     note: 'Search Hindi, English, Punjabi, Tamil and other music, and keep your playlists across devices. I only used official sources, like the YouTube and Spotify players, iTunes previews, Audius and Jamendo, so it never rips songs. A Flutter app on the same API is next.',
@@ -74,7 +75,7 @@ const PROJECTS = [
     demo: 'naad', demoTitle: 'Play a raga', demoNote: 'Your browser makes this sound live. Naad means &ldquo;sound&rdquo;.'
   },
   {
-    id: 'derma', tags: ['Business'], name: 'Derma Tracker', logo: 'assets/logos/derma.svg', shot: 'assets/shots/derma.jpg',
+    id: 'derma', tags: ['Business'], layers: ['ui', 'api', 'db', 'whatsapp'], name: 'Derma Tracker', logo: 'assets/logos/derma.svg', shot: 'assets/shots/derma.jpg',
     accent: '#6aa8ff',
     kind: 'Treatment tracker for a skin clinic', status: 'Built',
     note: 'The clinic counted multi-session courses in a paper register and phoned each patient by hand. Now staff enter a course once, patients get a WhatsApp reminder with a booking link, and the session count updates itself. The screenshot shows sample patients.',
@@ -84,7 +85,7 @@ const PROJECTS = [
     demo: 'derma', demoTitle: 'Run a course', demoNote: 'Made-up patient. Dates count from today.'
   },
   {
-    id: 'consultancy', tags: ['Business'], name: 'E-Commerce Consultancy', logo: 'assets/logos/consultancy.svg', shot: 'assets/shots/consultancy.jpg',
+    id: 'consultancy', tags: ['Business'], layers: ['ui', 'forms'], name: 'E-Commerce Consultancy', logo: 'assets/logos/consultancy.svg', shot: 'assets/shots/consultancy.jpg',
     accent: '#ee6c4d',
     kind: 'Website for a client', status: 'Client project',
     note: 'A site for a GeM tender and marketplace consultant. Each enquiry goes straight to the owner\'s Google Sheet and email through Apps Script, so there\'s no backend to pay for.',
@@ -94,7 +95,7 @@ const PROJECTS = [
     demo: 'leads', demoTitle: 'Send an enquiry', demoNote: 'Nothing leaves this page.'
   },
   {
-    id: 'calculator', tags: [], name: 'Calculator', logo: 'assets/logos/calculator.svg',
+    id: 'calculator', tags: [], layers: ['ui'], name: 'Calculator', logo: 'assets/logos/calculator.svg',
     accent: '#c9a2ff',
     kind: 'My first GitHub repo', status: '2022',
     note: 'In 2022 I pushed an empty file called cal.html, with the description "trying my best". I\'ve left it up. The working calculator below is the one it was supposed to become.',

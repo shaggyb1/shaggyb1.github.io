@@ -17,7 +17,7 @@
 <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400..800&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 <link rel="stylesheet" href="background.css">
 </head>
@@ -44,9 +44,9 @@
   <main>
     <section class="hero">
       <div class="hero-text">
-        <p class="hello">Hello, I'm</p>
+        <p class="layer"><i>layer</i> hello</p>
         <h1 class="hero-name">Bhushan <span>Kumbhare</span></h1>
-        <p class="hero-role">Full Stack Developer</p>
+        <p class="hero-role">Full stack developer</p>
         <p class="intro">I design, build and launch web apps, AI tools and Android apps. I live between Delhi and Nagpur, and I'm looking for a full-time role, remote or on site.</p>
         <p class="intro proof">My main project, <a href="https://upsoar.in" target="_blank" rel="noopener">Upsoar</a>, is live with 15 users, 5 of them paying (2026 figures).</p>
         <div class="hero-buttons">
@@ -55,6 +55,7 @@
           <a class="btn" href="https://github.com/shaggyb1" target="_blank" rel="noopener">GitHub</a>
           <a class="btn" href="#contact">Hire me</a>
         </div>
+        <p class="status"><span aria-hidden="true">●</span> Open to full-time roles · Delhi / Nagpur · remote OK</p>
       </div>
       <div class="hero-visual">
         <div class="stack-modes" role="group" aria-label="What the stack shows">
@@ -69,12 +70,14 @@
     </section>
 
     <section id="work">
+      <p class="layer"><i>layer 01</i> work</p>
       <h2>Latest projects</h2>
       <div class="filters" id="project-filter" role="group" aria-label="Filter projects"></div>
       <div id="project-list"></div>
     </section>
 
     <section id="about" class="prose-section">
+      <p class="layer"><i>layer 02</i> about</p>
       <h2>About</h2>
       <div class="prose">
         <p>I did a BA at the University of Delhi (SOL) and studied web development at TGC in New Delhi in 2020. From 2020 to 2025 I prepared for government exams and kept training on the side, including the Java Full Stack course at Kiran Academy, Pune, in 2022 and 2023.</p>
@@ -85,11 +88,13 @@
     </section>
 
     <section id="skills" class="prose-section">
+      <p class="layer"><i>layer 03</i> stack</p>
       <h2>My skills</h2>
       <div id="skills-list"></div>
     </section>
 
     <section id="contact" class="prose-section">
+      <p class="layer"><i>layer 04</i> contact</p>
       <h2>Let's talk</h2>
       <div class="prose">
         <form class="contact-form" id="contact-form">
@@ -108,7 +113,10 @@
     </section>
   </main>
 
-  <footer class="foot">Written in plain HTML, CSS and JavaScript.</footer>
+  <footer class="foot">
+    <span>© 2026 Bhushan Kumbhare · plain HTML, CSS and JavaScript</span>
+    <span>stack <b>v2026.11</b> · <a href="https://github.com/shaggyb1/shaggyb1.github.io/commits/main" target="_blank" rel="noopener">changelog</a></span>
+  </footer>
 </div>
 
 <script src="data.js"></script>

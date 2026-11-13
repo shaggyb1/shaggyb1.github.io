@@ -58,6 +58,13 @@ function headBlock(p, tag) {
   return head;
 }
 
+function layerChips(p) {
+  const row = el('p', 'p-layers');
+  row.append(el('span', 'p-layers-label', 'Layers I built'));
+  p.layers.forEach(l => row.append(el('span', 'chip', l)));
+  return row;
+}
+
 function shotImage(p) {
   if (p.video) {
     const video = el('video', 'p-shot');
@@ -94,10 +101,10 @@ PROJECTS.forEach(p => {
       ol.append(li);
     });
     hist.append(ol);
-    item.append(headBlock(p, 'h3'), lede, shotImage(p), cols, projectLinks(p), el('p', 'p-tech', 'Tech stack: ' + p.tech), demoBlock(p), hist);
+    item.append(headBlock(p, 'h3'), lede, shotImage(p), cols, projectLinks(p), el('p', 'p-tech', 'Tech stack: ' + p.tech), layerChips(p), demoBlock(p), hist);
   } else {
     if (p.shot) item.append(shotImage(p));
-    item.append(headBlock(p, 'h3'), el('p', 'p-note', p.note), projectLinks(p), el('p', 'p-tech', 'Tech stack: ' + p.tech), demoBlock(p));
+    item.append(headBlock(p, 'h3'), el('p', 'p-note', p.note), projectLinks(p), el('p', 'p-tech', 'Tech stack: ' + p.tech), layerChips(p), demoBlock(p));
   }
   (p.feature ? list : cards).append(item);
 });
