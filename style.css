@@ -230,6 +230,8 @@ ul.cart { list-style: none; margin: 0; padding: 0; }
 .calc-grid .fn { color: var(--p); }
 
 @media (max-width: 760px) {
+  /* Keeps the footer readable over the black hole, which ends up behind it on phones. */
+  .foot { margin-left: -18px; margin-right: -18px; padding-left: 18px; padding-right: 18px; background: rgba(4, 6, 15, .72); }
   body { font-size: 18px; }
   .page { padding: 0 18px; }
   .hero { grid-template-columns: minmax(0, 1fr); gap: 32px; padding-top: 30px; }
